@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "outDir": "bin",
+    "lib": ["ESNext"],
+    "module": "CommonJS",
+    "target": "ES2021",
+    "moduleResolution": "Node",
+    "moduleDetection": "force",
+    "strict": true,
+    "downlevelIteration": true,
+    "skipLibCheck": true,
+    "jsx": "preserve",
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "types": [
+      "bun-types" // add Bun global
+    ]
+  }
+}

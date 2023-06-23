@@ -1,0 +1,13 @@
+import { Elysia, t } from 'elysia'
+import { cookie } from '@elysiajs/cookie'
+
+import { Lucia } from '@elysiajs/lucia-auth'
+import prismaAdapter from '@lucia-auth/adapter-prisma'
+
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
+
+const lucia = Lucia({
+    adapter: prismaAdapter(new PrismaClient())
+})

@@ -1,0 +1,112 @@
+export const auth = (app: Elysia) =>
+    app.group('/auth', (app) =>
+        app
+            .use(cookie())
+            .model(
+                'auth',
+                t.Object({
+                    username: t.String(),
+                    password: t.String({
+                        minLength: 8
+                    })
+                })
+            )
+            .put(
+                '/sign-up',
+                async ({ body: { username, password } }) =>
+                    lucia.createUser({
+                        primaryKey: {
+                            providerId: 'username',
+                            providerUserId: username,
+                            password
+                        },
+                        attributes: {
+                            username
+                        }
+                    }),
+                {
+                    body: 'auth'
+                }
+            )
+            .post(
+                '/sign-in',
+                async ({ set, setCookie, body: { username, password } }) => {
+                    try {
+                        const { userId } = await lucia.useKey(
+                            'username',
+                            username,
+                            password
+                        )
+
+                        const { sessionId } = await lucia.createSession(userId)
+                        setCookie('session', sessionId)
+
+                        return `Sign in as ${username}`
+                    } catch {
+                        set.status = 401
+
+                        return 'Invalid username or password'
+                    }
+                },
+                {
+                    body: 'auth'
+                }
+            )
+            .get(
+                '/profile',
+                async ({ cookie: { session } }) => {
+                    const { userId: id } = await lucia.getSession(session)
+
+                    return prisma.authUser.findUnique({
+                        where: {
+                            id
+                        }
+                    })
+                },
+                {
+                    beforeHandle: lucia.sessionGuard
+                }
+            )
+            .get(
+                '/refresh',
+                async ({ cookie: { session }, setCookie }) => {
+                    const { userId: id } = await lucia.renewSession(session)
+
+                    setCookie('session', id)
+
+                    return session
+                },
+                {
+                    beforeHandle: lucia.sessionGuard
+                }
+            )
+            .get(
+                '/sign-out',
+                async ({ cookie: { session }, removeCookie }) => {
+                    await lucia.invalidateSession(session)
+
+                    removeCookie('session')
+
+                    return session
+                },
+                {
+                    beforeHandle: lucia.sessionGuard
+                }
+            )
+            .delete(
+                '/user',
+                async ({ cookie: { session } }) => {
+                    const { userId: id } = await lucia.getSession(session)
+
+                    await lucia.deleteDeadUserSessions(session)
+                    await lucia.deleteUser(id)
+
+                    return id
+                },
+                {
+                    beforeHandle: lucia.sessionGuard
+                }
+            )
+    )
+
+export default auth

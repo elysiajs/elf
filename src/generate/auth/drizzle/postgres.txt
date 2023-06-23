@@ -1,0 +1,63 @@
+import { Elysia, t } from 'elysia'
+import { cookie } from '@elysiajs/cookie'
+
+import { Lucia } from '@elysiajs/lucia-auth'
+import { pg } from '@lucia-auth/adapter-postgresql'
+
+import postgres from 'pg'
+import { eq } from 'drizzle-orm'
+import { drizzle } from 'drizzle-orm/node-postgres'
+import { pgTable, bigint, varchar, boolean } from 'drizzle-orm/pg-core'
+
+const user = pgTable('auth_user', {
+    id: varchar('id', {
+        // change this when using custom user ids
+        length: 15
+    }).primaryKey()
+    // other user attributes
+})
+
+const session = pgTable('auth_session', {
+    id: varchar('id', {
+        length: 128
+    }).primaryKey(),
+    userId: varchar('user_id', {
+        length: 15
+    })
+        .notNull()
+        .references(() => user.id),
+    activeExpires: bigint('active_expires', {
+        mode: 'number'
+    }).notNull(),
+    idleExpires: bigint('idle_expires', {
+        mode: 'number'
+    }).notNull()
+})
+
+const key = pgTable('auth_key', {
+    id: varchar('id', {
+        length: 255
+    }).primaryKey(),
+    userId: varchar('user_id', {
+        length: 15
+    })
+        .notNull()
+        .references(() => user.id),
+    primaryKey: boolean('primary_key').notNull(),
+    hashedPassword: varchar('hashed_password', {
+        length: 255
+    }),
+    expires: bigint('expires', {
+        mode: 'number'
+    })
+})
+
+const connectionPool = new postgres.Pool({
+    connectionString: process.env.DATABASE_URL
+})
+
+const db = drizzle(connectionPool)
+
+const lucia = Lucia({
+    adapter: pg(connectionPool)
+})

@@ -1,0 +1,79 @@
+import { Elysia, t } from 'elysia'
+import { cookie } from '@elysiajs/cookie'
+
+import { Lucia } from '@elysiajs/lucia-auth'
+import { mysql2 } from '@lucia-auth/adapter-mysql'
+
+import mysql from 'mysql2/promise'
+import { eq } from 'drizzle-orm'
+import { mysqlTable, bigint, varchar, boolean } from 'drizzle-orm/mysql-core'
+import { drizzle } from 'drizzle-orm/mysql2'
+
+import redis from '@lucia-auth/adapter-session-redis'
+import { createClient } from 'redis'
+
+export const user = mysqlTable('auth_user', {
+    id: varchar('id', {
+        // change this when using custom user ids
+        length: 15
+    }).primaryKey()
+    // other user attributes
+})
+
+export const session = mysqlTable('auth_session', {
+    id: varchar('id', {
+        length: 128
+    }).primaryKey(),
+    userId: varchar('user_id', {
+        length: 15
+    })
+        .notNull()
+        .references(() => user.id),
+    activeExpires: bigint('active_expires', {
+        mode: 'number'
+    }).notNull(),
+    idleExpires: bigint('idle_expires', {
+        mode: 'number'
+    }).notNull()
+})
+
+export const key = mysqlTable('auth_key', {
+    id: varchar('id', {
+        length: 255
+    }).primaryKey(),
+    userId: varchar('user_id', {
+        length: 15
+    })
+        .notNull()
+        .references(() => user.id),
+    primaryKey: boolean('primary_key').notNull(),
+    hashedPassword: varchar('hashed_password', {
+        length: 255
+    }),
+    expires: bigint('expires', {
+        mode: 'number'
+    })
+})
+
+const connectionPool = mysql.createPool({
+    // 'mysql://user:pass@host'
+    uri: process.env.DATABASE_URL
+})
+
+const db = drizzle(connectionPool)
+
+const userSessionClient = createClient()
+const sessionClient = createClient()
+
+await userSessionClient.connect()
+await sessionClient.connect()
+
+const lucia = Lucia({
+    adapter: {
+        user: mysql2(connectionPool),
+        session: redis({
+            session: sessionClient,
+            userSession: userSessionClient
+        })
+    }
+})

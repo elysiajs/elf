@@ -1,0 +1,28 @@
+import { Elysia, t } from 'elysia'
+import { cookie } from '@elysiajs/cookie'
+
+import { Lucia } from '@elysiajs/lucia-auth'
+import prismaAdapter from '@lucia-auth/adapter-prisma'
+
+import { PrismaClient } from '@prisma/client'
+
+import redis from '@lucia-auth/adapter-session-redis'
+import { createClient } from 'redis'
+
+const prisma = new PrismaClient()
+
+const userSessionClient = createClient()
+const sessionClient = createClient()
+
+await userSessionClient.connect()
+await sessionClient.connect()
+
+const lucia = Lucia({
+    adapter: {
+        user: prismaAdapter(new PrismaClient()),
+        session: redis({
+            session: sessionClient,
+            userSession: userSessionClient
+        })
+    }
+})

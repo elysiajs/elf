@@ -1,0 +1,64 @@
+import { Elysia, t } from 'elysia'
+import { cookie } from '@elysiajs/cookie'
+
+import { Lucia } from '@elysiajs/lucia-auth'
+import { planetscale } from '@lucia-auth/adapter-mysql'
+
+import { connect } from '@planetscale/database'
+import { eq } from 'drizzle-orm'
+import { mysqlTable, bigint, varchar, boolean } from 'drizzle-orm/mysql-core'
+import { drizzle } from 'drizzle-orm/planetscale-serverless'
+
+export const user = mysqlTable('auth_user', {
+    id: varchar('id', {
+        // change this when using custom user ids
+        length: 15
+    }).primaryKey()
+    // other user attributes
+})
+
+export const session = mysqlTable('auth_session', {
+    id: varchar('id', {
+        length: 128
+    }).primaryKey(),
+    userId: varchar('user_id', {
+        length: 15
+    })
+        .notNull()
+        .references(() => user.id),
+    activeExpires: bigint('active_expires', {
+        mode: 'number'
+    }).notNull(),
+    idleExpires: bigint('idle_expires', {
+        mode: 'number'
+    }).notNull()
+})
+
+export const key = mysqlTable('auth_key', {
+    id: varchar('id', {
+        length: 255
+    }).primaryKey(),
+    userId: varchar('user_id', {
+        length: 15
+    })
+        .notNull()
+        .references(() => user.id),
+    primaryKey: boolean('primary_key').notNull(),
+    hashedPassword: varchar('hashed_password', {
+        length: 255
+    }),
+    expires: bigint('expires', {
+        mode: 'number'
+    })
+})
+
+const connection = connect({
+    // 'mysql://user:pass@host'
+    url: process.env.DATABASE_URL
+})
+
+const db = drizzle(connection)
+
+const lucia = Lucia({
+    adapter: planetscale(connection)
+})
