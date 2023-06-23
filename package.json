@@ -1,7 +1,7 @@
 {
   "name": "@elysiajs/elf",
   "description": "Convenient way to scaffold Elysia project",
-  "version": "0.0.0-exp-20230623.2340",
+  "version": "0.0.0-exp-20230624.0031",
   "author": {
     "name": "saltyAom",
     "url": "https://github.com/SaltyAom",
@@ -13,7 +13,7 @@
   },
   "scripts": {
     "build": "swc ./src -d bin --copy-files",
-    "release": "npm run build && npm publish"
+    "release": "npm run build && npm publish --access public"
   },
   "dependencies": {
     "@inquirer/select": "^1.2.1",

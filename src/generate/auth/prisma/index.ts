@@ -94,13 +94,13 @@ export const prisma = async () => {
 
     await $`bunx prisma generate`
 
-    const oauthCode = await oauth()
-
     const { prefix } = await i.prompt({
         name: 'prefix',
         message: 'Path prefix',
         default: '/auth'
     })
+
+    const oauthCode = await oauth(prefix)
 
     const { file } = await i.prompt({
         name: 'file',

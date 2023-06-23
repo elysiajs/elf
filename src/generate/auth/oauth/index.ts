@@ -29,11 +29,12 @@ const createOauthEnv = async (name: string) => `
 ${name.toUpperCase()}_CLIENT_ID=${await ask(`${capitalize(name)} Client ID`)}
 ${name.toUpperCase()}_CLIENT_SECRET=${await ask(`${capitalize(name)} Secret`)}`
 
-const createOauthCode = (name: string) => `.use(
+const createOauthCode = (name: string, prefix = '/auth') => `.use(
     lucia.oauth.${name}({
         config: {
             clientId: process.env.${name.toUpperCase()}_CLIENT_ID!,
-            clientSecret: process.env.${name.toUpperCase()}_CLIENT_SECRET!
+            clientSecret: process.env.${name.toUpperCase()}_CLIENT_SECRET!,
+            redirectUri: 'http://localhost${prefix}/${name}/callback'
         }
     })
 )`
@@ -52,7 +53,7 @@ const appendOAuth = async (name: string) => {
         )
 }
 
-const oauth = async () => {
+const oauth = async (prefix = '/auth') => {
     const { oauth } = await i.prompt({
         name: 'oauth',
         message: 'Select OAuth Provider (optional)',
