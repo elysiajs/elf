@@ -9,5 +9,5 @@ import { PrismaClient } from '@prisma/client'
 const prisma = new PrismaClient()
 
 const lucia = Lucia({
-    adapter: prismaAdapter(new PrismaClient())
+    adapter: prismaAdapter(prisma as any)
 })

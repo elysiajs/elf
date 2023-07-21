@@ -55,12 +55,53 @@ export const prisma = async () => {
         encoding: 'utf8'
     })
 
+    let schema = await readFile('prisma/schema.prisma', {
+        encoding: 'utf8'
+    })
+
+    const database = await select({
+        message: 'Database provider',
+        choices: [
+            {
+                value: 'postgres'
+            },
+            {
+                value: 'mysql'
+            },
+            {
+                value: 'planetscale'
+            },
+            {
+                value: 'cockroachdb'
+            },
+            {
+                value: 'mongodb'
+            },
+            {
+                value: 'sqlite'
+            },
+            {
+                value: 'sqlserver'
+            }
+        ]
+    } as const)
+
+    if (database === 'planetscale')
+        schema = schema.replace(
+            'datasource db {',
+            'datasource db {\n  relationMode = "prisma"'
+        )
+
+    schema = schema.replace(
+        'provider     = "postgres"',
+        `provider     = "${database === 'planetscale' ? 'mysql' : database}"`
+    )
+
     if (dotenv.includes('://johndoe:randompassword')) {
         const { url } = await i.prompt({
             name: 'url',
             message: 'Provide DATABASE_URL',
-            default:
-                'postgresql://postgres:12345678@localhost:5432/mydb?schema=public'
+            default: PrismaTemplate.connection[database]
         })
 
         await writeFile(
@@ -69,12 +110,14 @@ export const prisma = async () => {
         )
     }
 
-    const schema = await readFile('prisma/schema.prisma', {
-        encoding: 'utf8'
-    })
-
     if (!schema.includes('model AuthUser')) {
-        await writeFile('prisma/schema.prisma', schema + PrismaTemplate.schema)
+        await writeFile(
+            'prisma/schema.prisma',
+            schema +
+                (database === 'mongodb'
+                    ? PrismaTemplate.schemaMongo
+                    : PrismaTemplate.schema)
+        )
 
         const { shouldMigrate } = await i.prompt({
             name: 'shouldMigrate',

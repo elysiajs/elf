@@ -34,7 +34,7 @@ const createOauthCode = (name: string, prefix = '/auth') => `.use(
         config: {
             clientId: process.env.${name.toUpperCase()}_CLIENT_ID!,
             clientSecret: process.env.${name.toUpperCase()}_CLIENT_SECRET!,
-            redirectUri: 'http://localhost${prefix}/${name}/callback'
+            redirectUri: 'http://localhost:3000${prefix}/${name}/callback'
         }
     })
 )`

@@ -1,7 +1,7 @@
 {
   "name": "@elysiajs/elf",
   "description": "Convenient way to scaffold Elysia project",
-  "version": "0.0.0-exp-20230624.0031",
+  "version": "0.0.0-exp-20230721.1301",
   "author": {
     "name": "saltyAom",
     "url": "https://github.com/SaltyAom",

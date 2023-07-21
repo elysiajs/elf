@@ -19,7 +19,7 @@ await sessionClient.connect()
 
 const lucia = Lucia({
     adapter: {
-        user: prismaAdapter(new PrismaClient()),
+        user: prismaAdapter(prisma as any),
         session: redis({
             session: sessionClient,
             userSession: userSessionClient

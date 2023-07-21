@@ -52,32 +52,15 @@ export const auth = (app: Elysia) =>
                     body: 'auth'
                 }
             )
-            .get(
-                '/profile',
-                async ({ cookie: { session } }) => {
-                    const { userId: id } = await lucia.getSession(session)
-
-                    return prisma.authUser.findUnique({
-                        where: {
-                            id
-                        }
-                    })
-                },
-                {
-                    beforeHandle: lucia.sessionGuard
-                }
-            )
+            .onBeforeHandle(lucia.sessionGuard)
             .get(
                 '/refresh',
                 async ({ cookie: { session }, setCookie }) => {
-                    const { userId: id } = await lucia.renewSession(session)
+                    const { sessionId: id } = await lucia.renewSession(session)
 
                     setCookie('session', id)
 
                     return session
-                },
-                {
-                    beforeHandle: lucia.sessionGuard
                 }
             )
             .get(
@@ -88,23 +71,30 @@ export const auth = (app: Elysia) =>
                     removeCookie('session')
 
                     return session
-                },
-                {
-                    beforeHandle: lucia.sessionGuard
                 }
+            )
+            .derive(async ({ cookie: { session } }) => {
+                const { userId } = await lucia.getSession(session)
+
+                return {
+                    userId
+                }
+            })
+            .get(
+                '/profile',
+                async ({ userId }) => prisma.authUser.findUnique({
+                    where: {
+                        id: userId
+                    }
+                })
             )
             .delete(
                 '/user',
-                async ({ cookie: { session } }) => {
-                    const { userId: id } = await lucia.getSession(session)
-
+                async ({ userId, cookie: { session } }) => {
                     await lucia.deleteDeadUserSessions(session)
-                    await lucia.deleteUser(id)
+                    await lucia.deleteUser(userId)
 
-                    return id
-                },
-                {
-                    beforeHandle: lucia.sessionGuard
+                    return userId
                 }
             )
     )
