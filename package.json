@@ -16,6 +16,7 @@
     "release": "npm run build && npm publish --access public"
   },
   "dependencies": {
+    "@griseo.js/brush": "^1.4.2",
     "@inquirer/select": "^1.2.1",
     "chalk": "4.1.2",
     "inquirer": "8.2.5",

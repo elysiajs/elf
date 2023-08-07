@@ -1,5 +1,5 @@
 import select from '@inquirer/select'
-import chalk from 'chalk'
+import brush from '@griseo.js/brush'
 
 import auth from './auth'
 import route from './route'
@@ -17,7 +17,7 @@ export const generateOptions = () =>
 const generate = async (action: string) => {
     if (!generators.includes(action as any))
         return console.log(
-            'Generator for ' + chalk.red(action) + ' not found, skip...'
+            'Generator for ' + brush.red(action) + ' not found, skip...'
         )
 
     indent(`Generate ${capitalize(action)}`)

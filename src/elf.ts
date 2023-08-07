@@ -10,7 +10,7 @@ import { install } from './utils'
 import type { ParsedArgs } from 'minimist'
 
 import info from '../package.json'
-import chalk from 'chalk'
+import brush from '@griseo.js/brush'
 
 const argv: ParsedArgs = require('minimist')(process.argv.slice(2))
 let {
@@ -69,7 +69,7 @@ const main = async () => {
             case 'v':
             case 'version':
                 console.log(
-                    chalk.cyanBright.bold('Elf Elysia') + ' - ' + info.description
+                    brush.cyanBright.bold('Elf Elysia') + ' - ' + info.description
                 )
                 console.log('version: ' + info.version)
 
@@ -79,7 +79,7 @@ const main = async () => {
 
             default:
                 cmdNotFound = true
-                console.log(`${chalk.bold(action)} command not found`)
+                console.log(`${brush.bold(action)} command not found`)
         }
     }
 
