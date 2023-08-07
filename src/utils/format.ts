@@ -1,11 +1,11 @@
-import { bold } from 'chalk'
+import brush from '@griseo.js/brush'
 
 import { existsSync } from 'fs'
 import { readFile, writeFile } from 'fs/promises'
 
 import { format as formatCode, resolveConfig } from 'prettier'
 
-export const indent = (word: string) => console.log(bold(`\n> ${word}`))
+export const indent = (word: string) => console.log(brush.bold(`\n> ${word}`))
 
 export const capitalize = (word: string) =>
     word.charAt(0).toUpperCase() + word.slice(1)

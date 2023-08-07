@@ -1,6 +1,6 @@
 import i from 'inquirer'
 import select, { Separator } from '@inquirer/select'
-import c from 'chalk'
+import brush from '@griseo.js/brush'
 import { $, cd } from 'zx-cjs'
 
 import task from 'tasuku'

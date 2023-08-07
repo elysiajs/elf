@@ -1,5 +1,5 @@
 import i from 'inquirer'
-import chalk from 'chalk'
+import brush from '@griseo.js/brush'
 
 import bearer, { dependencies as bearerDeps } from './bearer'
 import cookie, { dependencies as cookieDeps } from './cookie'
@@ -48,7 +48,7 @@ export const addOptions = async () => {
 const add = async (action: string) => {
     if (!plugins.includes(action as any))
         return console.log(
-            'Plugin ' + chalk.red(action) + ' not found, skip...'
+            'Plugin ' + brush.red(action) + ' not found, skip...'
         )
 
     const deps = depsMap[action as keyof typeof depsMap]
